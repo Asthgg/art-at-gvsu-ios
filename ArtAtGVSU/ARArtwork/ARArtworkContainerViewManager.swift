@@ -19,6 +19,7 @@ final class ARArtworkContainerViewManager: ObservableObject {
     var arView = ArtworkCustomARView()
     var audioPlayer: AVAudioPlayer!
     var boxEntity: ModelEntity!
+    var animatedObject: Entity!
     var sculptureEntity: ModelEntity!
     var textEntity: ModelEntity!
     var avPlayerLooper: AVPlayerLooper!
@@ -76,6 +77,37 @@ final class ARArtworkContainerViewManager: ObservableObject {
        anchorEntity.addChild(textEntity)
     
        arView.scene.anchors.append(anchorEntity)
+    }
+    
+    func addAnimatedObject(anchor: ARAnchor, modelUrl: URL) {
+        if animatedObject != nil {
+            print("Anchor already recognized in scene.")
+            return
+        }
+        
+        guard anchor.isKind(of: ARObjectAnchor.classForCoder()) else {
+            print("ARAnchor is not of object type")
+            return
+        }
+        
+        animatedObject = try? Entity.load(named: "art.scnassets/talking_head.usdz")
+        
+        let anchorEntity = AnchorEntity(anchor: anchor)
+        anchorEntity.addChild(animatedObject!)
+        
+        animatedObject?.orientation = simd_quatf(angle: (90 * Float.pi / 180.0), axis: SIMD3<Float>(1,0,0))
+        
+        arView.scene.subscribe(to: SceneEvents.DidAddEntity.self) { _ in
+            if anchorEntity.isActive {
+                for entity in anchorEntity.children {
+                    for animation in entity.availableAnimations {
+                        entity.playAnimation(animation.repeat())
+                    }
+                }
+            }
+        }.store(in: &subscriptions)
+        
+        arView.scene.anchors.append(anchorEntity)
     }
     
     func addBox(anchor: ARAnchor) {

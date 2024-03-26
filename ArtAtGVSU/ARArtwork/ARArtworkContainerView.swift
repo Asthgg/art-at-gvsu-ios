@@ -48,8 +48,7 @@ struct ARContainerView: UIViewRepresentable {
                   parent.containerViewManager.asynclo(anchor: anchor, modelUrl: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
 //                  parent.containerViewManager.addCup(anchor: anchor, path: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
               } else if (anchor is ARObjectAnchor) {
-                  parent.containerViewManager.makeVideoNode(anchor: anchor)
-                  parent.containerViewManager.addBox(anchor: anchor)
+                  parent.containerViewManager.addAnimatedObject(anchor: anchor, modelUrl: parent.arArtwork.models[0].url)
               }
           }
        }
