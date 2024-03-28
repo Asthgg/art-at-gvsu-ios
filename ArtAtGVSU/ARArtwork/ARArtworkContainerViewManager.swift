@@ -19,7 +19,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
     var arView = ArtworkCustomARView()
     var audioPlayer: AVAudioPlayer!
     var boxEntity: ModelEntity!
-    var animatedObject: Entity!
     var sculptureEntity: ModelEntity!
     var textEntity: ModelEntity!
     var avPlayerLooper: AVPlayerLooper!
@@ -80,34 +79,35 @@ final class ARArtworkContainerViewManager: ObservableObject {
     }
     
     func addAnimatedObject(anchor: ARAnchor, modelUrl: URL) {
-        if animatedObject != nil {
-            print("Anchor already recognized in scene.")
-            return
-        }
-        
         guard anchor.isKind(of: ARObjectAnchor.classForCoder()) else {
             print("ARAnchor is not of object type")
             return
         }
         
-        animatedObject = try? Entity.load(named: "art.scnassets/talking_head.usdz")
+        print("Detected anchor: \(anchor.name!)")
         
         let anchorEntity = AnchorEntity(anchor: anchor)
-        anchorEntity.addChild(animatedObject!)
-        
-        animatedObject?.orientation = simd_quatf(angle: (90 * Float.pi / 180.0), axis: SIMD3<Float>(1,0,0))
-        
-        arView.scene.subscribe(to: SceneEvents.DidAddEntity.self) { _ in
-            if anchorEntity.isActive {
-                for entity in anchorEntity.children {
-                    for animation in entity.availableAnimations {
-                        entity.playAnimation(animation.repeat())
-                    }
-                }
-            }
-        }.store(in: &subscriptions)
-        
         arView.scene.anchors.append(anchorEntity)
+        
+        ModelEntity.loadAsync(contentsOf: modelUrl).sink(receiveCompletion: { loadCompletion in
+            switch loadCompletion {
+            case .failure(let error):
+                print("Unable to load model: \(error.localizedDescription)")
+            case .finished:
+                print("Load async finished")
+                break
+            }
+        }, receiveValue: { entity in
+            DispatchQueue.global().async {
+                for child in entity.children {
+                    anchorEntity.addChild(child)
+                    child.orientation = simd_quatf(angle: (99 * Float.pi / 180.0), axis: SIMD3<Float>(1,0,0)) // This rotates the test head entity to the correct orientation.
+                }
+                
+                let a = anchorEntity.availableAnimations[0]
+                anchorEntity.playAnimation(a.repeat(duration: .infinity), transitionDuration: 1.25, startsPaused: false)
+            }
+        }).store(in: &subscriptions)
     }
     
     func addBox(anchor: ARAnchor) {

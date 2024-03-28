@@ -5,7 +5,10 @@
   },
   "resources" : [
     {
-      "filename" : "Test-Model.arobject"
+      "filename" : "Day-Test-2.arobject"
+    },
+    {
+      "filename" : "Day-Test.arobject"
     }
   ]
 }
