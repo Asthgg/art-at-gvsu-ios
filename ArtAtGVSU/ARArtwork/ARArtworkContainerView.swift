@@ -48,6 +48,8 @@ struct ARContainerView: UIViewRepresentable {
                   parent.containerViewManager.asynclo(anchor: anchor, modelUrl: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
 //                  parent.containerViewManager.addCup(anchor: anchor, path: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
               } else if (anchor is ARObjectAnchor) {
+                  print("didAdd")
+                  
                   parent.containerViewManager.addAnimatedObject(anchor: anchor, modelUrl: parent.arArtwork.models[0].url)
               }
           }
@@ -58,13 +60,18 @@ struct ARContainerView: UIViewRepresentable {
                 let anchorEntity = parent.containerViewManager.imageAnchorToEntity[$0]
                 anchorEntity?.transform.matrix = $0.transform
             }
+            anchors.compactMap { $0 as? ARObjectAnchor }.forEach {
+                print("didUpdate")
+                let anchorEntity = parent.containerViewManager.objectAnchorToEntity[$0]
+                anchorEntity?.transform.matrix = $0.transform
+            }
         }
     }
    
 
    func makeUIView(context: Context) -> ArtworkCustomARView {
        print("[INFO] [makeUIView]")
-       containerViewManager.arView.didTapView = didTapView(_:); containerViewManager.resetTrackingConfiguration(options: sessionRunOptions,artwork: arArtwork)
+       containerViewManager.arView.didTapView = didTapView(_:); containerViewManager.resetTrackingConfiguration(options: [.removeExistingAnchors,.resetSceneReconstruction],artwork: arArtwork)
        containerViewManager.arView.session.delegate = context.coordinator
        
        print("Session configuration: ", containerViewManager.arView.worldTrackingConfiguration)

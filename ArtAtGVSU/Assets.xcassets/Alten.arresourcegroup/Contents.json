@@ -9,6 +9,21 @@
     },
     {
       "filename" : "Day-Test.arobject"
+    },
+    {
+      "filename" : "Direct-Light-Test.arobject"
+    },
+    {
+      "filename" : "Half-Evening.arobject"
+    },
+    {
+      "filename" : "Half-Night.arobject"
+    },
+    {
+      "filename" : "OverheadLight-Test.arobject"
+    },
+    {
+      "filename" : "WholeSculpture-Midday-Overcast.arobject"
     }
   ]
 }

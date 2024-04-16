@@ -23,6 +23,8 @@ final class ARArtworkContainerViewManager: ObservableObject {
     var textEntity: ModelEntity!
     var avPlayerLooper: AVPlayerLooper!
     var imageAnchorToEntity: [ARImageAnchor: AnchorEntity] = [:]
+    var objectAnchorToEntity: [ARObjectAnchor: Entity] = [:]
+    var animatedObjectIsLoaded = false
     
     private let resourceLoader = ResourceLoader()
     
@@ -38,8 +40,9 @@ final class ARArtworkContainerViewManager: ObservableObject {
            guard let referenceObjects = ARReferenceObject.referenceObjects(inGroupNamed: "Alten", bundle: nil) else {
                fatalError("Missing expected asset catalog resources.")
            }
-
+           arView
            arView.worldTrackingConfiguration.detectionObjects = referenceObjects
+           arView.worldTrackingConfiguration.frameSemantics.remove(.personSegmentationWithDepth)
        }
        
        arView.session.run(
@@ -84,7 +87,14 @@ final class ARArtworkContainerViewManager: ObservableObject {
             return
         }
         
+        if animatedObjectIsLoaded {
+            print("Anchor already recognized in scene.")
+            return
+        }
+        
         print("Detected anchor: \(anchor.name!)")
+        print("Anchor Transform: \(anchor.transform)")
+        print("Anchor Columns: \(anchor.transform.columns)")
         
         let anchorEntity = AnchorEntity(anchor: anchor)
         arView.scene.anchors.append(anchorEntity)
@@ -95,17 +105,26 @@ final class ARArtworkContainerViewManager: ObservableObject {
                 print("Unable to load model: \(error.localizedDescription)")
             case .finished:
                 print("Load async finished")
+                self.animatedObjectIsLoaded.toggle()
                 break
             }
         }, receiveValue: { entity in
+            
+            print("AnchorEntity Transform: \(anchorEntity.transform.matrix)")
+            if let objectAnchor = anchor as? ARObjectAnchor {
+//                anchorEntity.transform.matrix = anchor.transform
+                print("AnchorEntity After Transform: \(anchorEntity.transform.matrix)")
+                self.objectAnchorToEntity[objectAnchor] = entity
+            }
+            
             DispatchQueue.global().async {
                 for child in entity.children {
                     anchorEntity.addChild(child)
                     child.orientation = simd_quatf(angle: (99 * Float.pi / 180.0), axis: SIMD3<Float>(1,0,0)) // This rotates the test head entity to the correct orientation.
                 }
                 
-                let a = anchorEntity.availableAnimations[0]
-                anchorEntity.playAnimation(a.repeat(duration: .infinity), transitionDuration: 1.25, startsPaused: false)
+//                let a = anchorEntity.availableAnimations[0]
+//                anchorEntity.playAnimation(a.repeat(duration: .infinity), transitionDuration: 1.25, startsPaused: false)
             }
         }).store(in: &subscriptions)
     }
