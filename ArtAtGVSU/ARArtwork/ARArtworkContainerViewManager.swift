@@ -23,7 +23,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
     var textEntity: ModelEntity!
     var avPlayerLooper: AVPlayerLooper!
     var imageAnchorToEntity: [ARImageAnchor: AnchorEntity] = [:]
-    var objectAnchorToEntity: [ARObjectAnchor: Entity] = [:]
     var animatedObjectIsLoaded = false
     
     private let resourceLoader = ResourceLoader()
@@ -40,7 +39,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
            guard let referenceObjects = ARReferenceObject.referenceObjects(inGroupNamed: "Alten", bundle: nil) else {
                fatalError("Missing expected asset catalog resources.")
            }
-           arView
            arView.worldTrackingConfiguration.detectionObjects = referenceObjects
            arView.worldTrackingConfiguration.frameSemantics.remove(.personSegmentationWithDepth)
        }
@@ -93,8 +91,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
         }
         
         print("Detected anchor: \(anchor.name!)")
-        print("Anchor Transform: \(anchor.transform)")
-        print("Anchor Columns: \(anchor.transform.columns)")
         
         let anchorEntity = AnchorEntity(anchor: anchor)
         arView.scene.anchors.append(anchorEntity)
@@ -110,19 +106,13 @@ final class ARArtworkContainerViewManager: ObservableObject {
             }
         }, receiveValue: { entity in
             
-            print("AnchorEntity Transform: \(anchorEntity.transform.matrix)")
-            if let objectAnchor = anchor as? ARObjectAnchor {
-//                anchorEntity.transform.matrix = anchor.transform
-                print("AnchorEntity After Transform: \(anchorEntity.transform.matrix)")
-                self.objectAnchorToEntity[objectAnchor] = entity
-            }
-            
             DispatchQueue.global().async {
                 for child in entity.children {
                     anchorEntity.addChild(child)
                     child.orientation = simd_quatf(angle: (99 * Float.pi / 180.0), axis: SIMD3<Float>(1,0,0)) // This rotates the test head entity to the correct orientation.
                 }
                 
+            //TODO: Uncomment the following lines when the real entity is available.
 //                let a = anchorEntity.availableAnimations[0]
 //                anchorEntity.playAnimation(a.repeat(duration: .infinity), transitionDuration: 1.25, startsPaused: false)
             }

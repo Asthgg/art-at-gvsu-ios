@@ -19,24 +19,22 @@ struct ArtworkDetailTitleRow: View {
                 .detailHeading()
                 .fixedSize(horizontal: false, vertical: true)
 
-            if artwork.arDigitalAsset != nil || artwork.id == "32481" {
+            if artwork.arDigitalAsset != nil || !artwork.ar3dModels.isEmpty {
                 Group {
                     Spacer()
-                    Button(action: {
-                        isActive = true
-                    }) {
+                    Button(action: presentARSplashView) {
                         Image(systemName: "camera.viewfinder")
                             .foregroundColor(Color(UIColor.label))
                             .imageScale(.large)
-                    }.disabled(isActive)
-                        .sheet(isPresented: $isActive) {
-                            ARSplashView(artwork: artwork)
-                        }
+                            .padding(EdgeInsets(top: 5, leading: 0, bottom: 0, trailing: 0))
+                    }
+//                    .disabled(isActive)
+//                        .sheet(isPresented: $isActive) {
+//                            ARSplashView(artwork: artwork)
+//                        }
                 }
             }
-//            } else {
-//                EmptyView()
-//            }
+            
             Spacer()
                 .frame(width: 16)
             Button(action: shareArtwork) {
@@ -62,6 +60,15 @@ struct ArtworkDetailTitleRow: View {
         )
         if let root = UIApplication.shared.windows.first?.rootViewController{
             root.present(activity, animated: true, completion: nil)
+        }
+    }
+    
+    func presentARSplashView() {
+        let splash = ARSplashViewController()
+        splash.artwork = self.artwork
+        
+        if let root = UIApplication.shared.windows.first?.rootViewController{
+            root.present(splash, animated: true, completion: nil)
         }
     }
 }

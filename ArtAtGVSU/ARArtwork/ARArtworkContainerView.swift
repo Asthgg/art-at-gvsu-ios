@@ -1,3 +1,4 @@
+import UIKit
 import SwiftUI
 import ARKit
 import RealityKit
@@ -31,7 +32,7 @@ struct ARContainerView: UIViewRepresentable {
 
         init(_ parent: ARContainerView) {
           self.parent = parent
-       }
+        }
         
         
        func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
@@ -48,8 +49,6 @@ struct ARContainerView: UIViewRepresentable {
                   parent.containerViewManager.asynclo(anchor: anchor, modelUrl: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
 //                  parent.containerViewManager.addCup(anchor: anchor, path: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
               } else if (anchor is ARObjectAnchor) {
-                  print("didAdd")
-                  
                   parent.containerViewManager.addAnimatedObject(anchor: anchor, modelUrl: parent.arArtwork.models[0].url)
               }
           }
@@ -58,11 +57,6 @@ struct ARContainerView: UIViewRepresentable {
         func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
             anchors.compactMap { $0 as? ARImageAnchor }.forEach {
                 let anchorEntity = parent.containerViewManager.imageAnchorToEntity[$0]
-                anchorEntity?.transform.matrix = $0.transform
-            }
-            anchors.compactMap { $0 as? ARObjectAnchor }.forEach {
-                print("didUpdate")
-                let anchorEntity = parent.containerViewManager.objectAnchorToEntity[$0]
                 anchorEntity?.transform.matrix = $0.transform
             }
         }
@@ -80,8 +74,7 @@ struct ARContainerView: UIViewRepresentable {
        return containerViewManager.arView
    }
 
-   func updateUIView(_ uiView: ArtworkCustomARView, context: Context) {
-   }
+   func updateUIView(_ uiView: ArtworkCustomARView, context: Context) {}
 
    func didTapView(_ sender: UITapGestureRecognizer) {
        print("[INFO] [didTapView]")
