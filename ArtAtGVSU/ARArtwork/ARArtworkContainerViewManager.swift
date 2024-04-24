@@ -16,14 +16,13 @@ import Combine
 final class ARArtworkContainerViewManager: ObservableObject {
     var type: String = "artwork"
     private var subscriptions: Set<AnyCancellable> = []
-    var arView = ArtworkCustomARView()
+    var arView = ArtworkCustomARView.shared
     var audioPlayer: AVAudioPlayer!
     var boxEntity: ModelEntity!
     var sculptureEntity: ModelEntity!
     var textEntity: ModelEntity!
     var avPlayerLooper: AVPlayerLooper!
     var imageAnchorToEntity: [ARImageAnchor: AnchorEntity] = [:]
-    var animatedObjectIsLoaded = false
     
     private let resourceLoader = ResourceLoader()
     
@@ -85,11 +84,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
             return
         }
         
-        if animatedObjectIsLoaded {
-            print("Anchor already recognized in scene.")
-            return
-        }
-        
         print("Detected anchor: \(anchor.name!)")
         
         let anchorEntity = AnchorEntity(anchor: anchor)
@@ -101,7 +95,6 @@ final class ARArtworkContainerViewManager: ObservableObject {
                 print("Unable to load model: \(error.localizedDescription)")
             case .finished:
                 print("Load async finished")
-                self.animatedObjectIsLoaded.toggle()
                 break
             }
         }, receiveValue: { entity in

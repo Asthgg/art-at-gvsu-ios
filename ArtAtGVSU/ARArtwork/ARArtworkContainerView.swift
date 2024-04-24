@@ -8,6 +8,7 @@ struct ARContainerView: UIViewRepresentable {
     var sessionRunOptions: ARSession.RunOptions
     var artwork: Artwork
     var arArtwork: ARArtwork
+    var animatedObjectIsLoaded: Bool = false
     @ObservedObject var containerViewManager = ARArtworkContainerViewManager()
     
      func makeCoordinator() -> Coordinator {
@@ -20,6 +21,11 @@ struct ARContainerView: UIViewRepresentable {
     ){
         print("Dismantle....")
         coordinator.parent.containerViewManager.arView.session.pause()
+        coordinator.parent.containerViewManager.arView.session.delegate = nil
+        coordinator.parent.containerViewManager.arView.scene.anchors.removeAll()
+        coordinator.parent.containerViewManager.arView.removeFromSuperview()
+        coordinator.parent.containerViewManager.arView.window?.resignKey()
+        
         
         print("Pausing session....")
         coordinator.parent.containerViewManager.audioPlayer?.pause()
@@ -49,7 +55,11 @@ struct ARContainerView: UIViewRepresentable {
                   parent.containerViewManager.asynclo(anchor: anchor, modelUrl: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
 //                  parent.containerViewManager.addCup(anchor: anchor, path: parent.arArtwork.models[0].url, transform: parent.arArtwork.models[0].metadata.transform!)
               } else if (anchor is ARObjectAnchor) {
-                  parent.containerViewManager.addAnimatedObject(anchor: anchor, modelUrl: parent.arArtwork.models[0].url)
+                  guard self.parent.animatedObjectIsLoaded else {
+                      parent.containerViewManager.addAnimatedObject(anchor: anchor, modelUrl: parent.arArtwork.models[0].url)
+                      self.parent.animatedObjectIsLoaded.toggle()
+                      return
+                  }
               }
           }
        }

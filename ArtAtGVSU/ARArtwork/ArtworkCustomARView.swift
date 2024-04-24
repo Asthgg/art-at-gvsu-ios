@@ -13,6 +13,7 @@ import ARKit
 import RealityKit
 
 final class ArtworkCustomARView: ARView {
+    static let shared = ArtworkCustomARView()
     // configuration
     let worldTrackingConfiguration: ARWorldTrackingConfiguration = {
         print("Configuring ar world tracking")
@@ -73,7 +74,7 @@ final class ArtworkCustomARView: ARView {
       super.init(coder: coder)
       commonInit()
    }
-   convenience init() {
+   private convenience init() {
       self.init(frame: .zero)
       commonInit()
    }
@@ -85,7 +86,7 @@ final class ArtworkCustomARView: ARView {
 
 final class ARContainerViewManager2: ObservableObject {
    // 2
-   var arView = ArtworkCustomARView()
+    var arView = ArtworkCustomARView.shared
    // 3
    private let worldTrackingConfiguration: ARWorldTrackingConfiguration = {
       let worldTrackingConfiguration = ARWorldTrackingConfiguration()

@@ -51,12 +51,9 @@ struct ARSplashView: View {
                 if arAssets != nil {
                     
                     ZStack {
-                        ARContainerView(sessionRunOptions:  [.removeExistingAnchors,
-                                                             .resetTracking], artwork: artwork, arArtwork: arAssets!)
-                        VStack {
-                            Spacer()
-                            ARArtworkButtonsView(count: count)
-                        }
+                        ARContainerView(sessionRunOptions:  [.removeExistingAnchors, .resetTracking],
+                                        artwork: artwork,
+                                        arArtwork: arAssets!)
                     }
                     .edgesIgnoringSafeArea(.all)
                 }
